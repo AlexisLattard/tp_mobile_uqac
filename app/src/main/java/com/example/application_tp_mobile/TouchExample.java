@@ -40,6 +40,7 @@ public class TouchExample extends View {
     private int widthScreen = getResources().getDisplayMetrics().widthPixels;
     private int heightScreen = getResources().getDisplayMetrics().heightPixels;
 
+    private int nbImageLigne = 7;
 
     public TouchExample(Context context) {
         super(context);
@@ -120,15 +121,12 @@ public class TouchExample extends View {
 
         BitmapDrawable image = loadImage(numeroPicture, zone);
 
-
-
 /*
         Rect (The X coordinate of the left side of the rectangle
         // , int: The Y coordinate of the top of the rectangle
         //, int: The X coordinate of the right side of the rectangle,
         //int: The Y coordinate of the bottom of the rectangle)
 */
-
         image.setBounds(zone);
 
         mPaint.setAntiAlias(true);
@@ -136,7 +134,6 @@ public class TouchExample extends View {
         mPaint.setFilterBitmap(true);
 
         image.draw(canvas);
-
 
     }
 
@@ -149,7 +146,7 @@ public class TouchExample extends View {
 
 
         int positionX = 0;
-        int nbLigne = heightScreen / (widthScreen / nbImageLigne);
+        int nbLigne =(int) (heightScreen / (widthScreen / nbImageLigne));
         int numeroImage = 0;
 
         for (int positionY = 0; positionY < nbLigne; positionY++) {
@@ -168,7 +165,7 @@ public class TouchExample extends View {
         super.onDraw(canvas);
         this.canvas = canvas;
 
-        refrshGallery(5);
+        refrshGallery(nbImageLigne);
         // canvas.drawBitmap(image.getBitmap(), 0, 0, mPaint);
         Log.d("DRAW", "onDraw(Canvas canvas)");
     }
@@ -234,6 +231,17 @@ public class TouchExample extends View {
         public boolean onScale(ScaleGestureDetector detector) {
             mScale *= detector.getScaleFactor();
             mPaint.setTextSize(mScale * mFontSize);
+            int valeur = (int) ((Math.abs(mScale)*0.1)%7);
+            Log.d("GESTURE", "mScale = "+mScale+"nb ligne : "+valeur);
+            if(mScale<0){
+                nbImageLigne = 7;
+            }else if (mScale>65){
+                nbImageLigne = 1;
+            }else
+            {
+                nbImageLigne = 7- valeur;
+            }
+
             invalidate();
 
             return true;
