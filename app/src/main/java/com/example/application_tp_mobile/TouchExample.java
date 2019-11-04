@@ -7,6 +7,10 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ScaleDrawable;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
@@ -52,9 +56,25 @@ public class TouchExample extends View {
             }
         }*/
 
-        Bitmap image = BitmapFactory.decodeFile(singleton.getInstance().imagePathList.get(0));
+        //Bitmap image = BitmapFactory.decodeFile(singleton.getInstance().imagePathList.get(0));
+        BitmapDrawable image = new BitmapDrawable(getResources(),singleton.getInstance().imagePathList.get(0)); // on recupere l'image
+
+        Rect rect = new Rect(50,50,200,200); // Rect (The X coordinate of the left side of the rectangle
+                                    // , int: The Y coordinate of the top of the rectangle
+                                     //, int: The X coordinate of the right side of the rectangle,
+                                   //int: The Y coordinate of the bottom of the rectangle)
+
+        image.setBounds(rect);
+
+
+        //mPaint.setAntiAlias(true);
+        //mPaint.setDither(true);
         mPaint.setFilterBitmap(true);
-        canvas.drawBitmap(image, 0, 0, mPaint);
+
+        image.draw(canvas);
+
+       // canvas.drawBitmap(image.getBitmap(), 0, 0, mPaint);
+        Log.d("DRAW", "onDraw(Canvas canvas)");
     }
 
     @Override
