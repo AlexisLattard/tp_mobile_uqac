@@ -1,6 +1,7 @@
 package com.example.application_tp_mobile;
 
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -16,6 +17,7 @@ import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 
 
@@ -30,7 +32,7 @@ public class TouchExample extends View {
     private Pointer[] mPointers = new Pointer[MAX_POINTERS];
     private Paint mPaint;
     private float mFontSize;
-
+    Canvas canvas;
     public TouchExample(Context context) {
         super(context);
         for (int i = 0; i < MAX_POINTERS; i++) {
@@ -44,36 +46,66 @@ public class TouchExample extends View {
 
         mGestureDetector = new GestureDetector(context, new ZoomGesture());
         mScaleGestureDetector = new ScaleGestureDetector(context, new ScaleGesture());
+
+
     }
 
-    @Override
-    protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-        /*for (Pointer p : mPointers) {
-            if (p.index != -1) {
-                String text = "Index: " + p.index + " ID: " + p.id;
-                canvas.drawText(text, p.x, p.y, mPaint);
-            }
-        }*/
-
-        //Bitmap image = BitmapFactory.decodeFile(singleton.getInstance().imagePathList.get(0));
-        BitmapDrawable image = new BitmapDrawable(getResources(),singleton.getInstance().imagePathList.get(0)); // on recupere l'image
-
-        Rect rect = new Rect(50,50,200,200); // Rect (The X coordinate of the left side of the rectangle
-                                    // , int: The Y coordinate of the top of the rectangle
-                                     //, int: The X coordinate of the right side of the rectangle,
-                                   //int: The Y coordinate of the bottom of the rectangle)
-
-        image.setBounds(rect);
+    /**
+     * affiche une image choisi de imagePathList dans une zone de l'écran donnée
+     *
+     * @param numberPicture numero de l'image dans imagePathList
+     * @param zone          position et taille de l'image
+     * @param canvas
+     */
+    public void drawPicture(int numberPicture, Rect zone, Canvas canvas) {
 
 
-        //mPaint.setAntiAlias(true);
-        //mPaint.setDither(true);
+        BitmapDrawable image = new BitmapDrawable(getResources(), singleton.getInstance().imagePathList.get(numberPicture)); // on recupere l'image
+
+
+
+/*
+        Rect (The X coordinate of the left side of the rectangle
+        // , int: The Y coordinate of the top of the rectangle
+        //, int: The X coordinate of the right side of the rectangle,
+        //int: The Y coordinate of the bottom of the rectangle)
+*/
+
+        image.setBounds(zone);
+
+        mPaint.setAntiAlias(true);
+        mPaint.setDither(true);
         mPaint.setFilterBitmap(true);
 
         image.draw(canvas);
 
-       // canvas.drawBitmap(image.getBitmap(), 0, 0, mPaint);
+    }
+
+    public void initGalleryLigne(int positionY) {
+
+        int widthScreen = getResources().getDisplayMetrics().widthPixels;
+        int heightScreen = getResources().getDisplayMetrics().heightPixels;
+        int positionX = 0;
+
+
+            for (int i = 0; i < 7; i++) {
+                positionX = i * (widthScreen / 7);
+                drawPicture(i, new Rect(positionX, positionY * (widthScreen / 7), positionX + (widthScreen / 7), (widthScreen / 7) + positionY * (widthScreen / 7)), canvas);
+
+            }
+            Log.d("INITGALLERY", "positionY = " + positionY);
+        }
+
+
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+this.canvas = canvas;
+
+        initGalleryLigne(0);
+
+        // canvas.drawBitmap(image.getBitmap(), 0, 0, mPaint);
         Log.d("DRAW", "onDraw(Canvas canvas)");
     }
 
