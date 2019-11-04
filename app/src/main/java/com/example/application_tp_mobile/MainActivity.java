@@ -1,25 +1,20 @@
 package com.example.application_tp_mobile;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.os.Bundle;
+import android.provider.MediaStore;
+import android.util.Log;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import android.Manifest;
-import android.app.Activity;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.database.Cursor;
-import android.net.Uri;
-import android.os.Bundle;
-import android.os.Environment;
-import android.provider.MediaStore;
-import android.util.Log;
-
-import java.util.ArrayList;
-
 public class MainActivity extends AppCompatActivity {
-    final static int GALLERY_REQUEST_CODE =10;
+    final static int GALLERY_REQUEST_CODE = 10;
     final static int MY_PERMISSIONS_REQUEST_EXTERNAL_STORAGE = 3;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
 
             // Permission is not granted
 
-            }
+        }
 // on recupere les path
         Cursor mCursor = getContentResolver()
                 .query(
@@ -55,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
                         MediaStore.Images.Media.DEFAULT_SORT_ORDER);
 
         mCursor.moveToFirst();
-        while(!mCursor.isAfterLast()) {
+        while (!mCursor.isAfterLast()) {
             Log.d("IMAGES", " - _ID : " + mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.Media._ID)));
             Log.d("IMAGES", " - File Name : " + mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.Media.DISPLAY_NAME)));
             Log.d("IMAGES", " - File Path : " + mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.Media.DATA)));
@@ -65,18 +60,7 @@ public class MainActivity extends AppCompatActivity {
         mCursor.close();
 
 
-
-
-
-
-
     }
-
-
-
-
-
-
 
 
 }
