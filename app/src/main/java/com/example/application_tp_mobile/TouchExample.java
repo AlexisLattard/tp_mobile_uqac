@@ -19,6 +19,7 @@ import android.view.View;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 
 public class TouchExample extends View {
@@ -35,7 +36,7 @@ public class TouchExample extends View {
 
 
     private Canvas canvas;
-    private ArrayList<BitmapDrawable> imageList = new ArrayList<BitmapDrawable>();
+    private HashMap<Integer, BitmapDrawable> imageList = new HashMap<Integer, BitmapDrawable>();
     private int widthScreen = getResources().getDisplayMetrics().widthPixels;
     private int heightScreen = getResources().getDisplayMetrics().heightPixels;
 
@@ -63,16 +64,23 @@ public class TouchExample extends View {
      * @param numeroPicture
      * @return
      */
-    public BitmapDrawable loadImage(final int numeroPicture, Rect zone) {
+    public BitmapDrawable loadImage( Integer numeroPicture, Rect zone) {
+        // on verifie que l'image n'est pas déja chargé
+        if (!imageList.containsKey(numeroPicture)) {
+            final BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+            BitmapFactory.decodeFile(singleton.getInstance().imagePathList.get(numeroPicture), options);
+            options.inSampleSize = calculateInSampleSize(options, zone.right - zone.left, zone.bottom - zone.bottom);
+            // Decode bitmap with inSampleSize set
+            options.inJustDecodeBounds = false;
+            Bitmap bitmap = BitmapFactory.decodeFile(singleton.getInstance().imagePathList.get(numeroPicture), options);
+            imageList.put(numeroPicture,new BitmapDrawable(getResources(), bitmap));
+            Log.d("LOAD", "image chargé");
+        }else{
+            Log.d("LOAD", "image exist déja, key = "+imageList.get(numeroPicture));
+        }
 
-        final BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(singleton.getInstance().imagePathList.get(numeroPicture), options);
-        options.inSampleSize = calculateInSampleSize(options, zone.right - zone.left, zone.bottom - zone.bottom);
-        // Decode bitmap with inSampleSize set
-        options.inJustDecodeBounds = false;
-        Bitmap bitmap = BitmapFactory.decodeFile(singleton.getInstance().imagePathList.get(numeroPicture), options);
-        return new BitmapDrawable(getResources(), bitmap);
+        return imageList.get(numeroPicture);
 
     }
 
@@ -134,6 +142,7 @@ public class TouchExample extends View {
 
     /**
      * charge et affiche un nombre d'image par ligne choisi
+     *
      * @param nbImageLigne nombre d'image sur une ligne
      */
     public void refrshGallery(int nbImageLigne) {
@@ -149,7 +158,7 @@ public class TouchExample extends View {
                 drawPicture(numeroImage, new Rect(positionX, positionY * (widthScreen / nbImageLigne), positionX + (widthScreen / nbImageLigne), (widthScreen / nbImageLigne) + positionY * (widthScreen / nbImageLigne)), canvas);
                 numeroImage++;
             }
-            Log.d("INITGALLERY", "positionY = " + positionY+"total Ligne = "+nbLigne);
+            Log.d("INITGALLERY", "positionY = " + positionY + "total Ligne = " + nbLigne);
         }
     }
 
