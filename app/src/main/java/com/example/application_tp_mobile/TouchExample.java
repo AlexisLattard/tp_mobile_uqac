@@ -1,17 +1,28 @@
 package com.example.application_tp_mobile;
 
 
+import android.app.Activity;
 import android.content.Context;
+import android.database.Cursor;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.net.Uri;
+import android.provider.MediaStore;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 
+import java.util.ArrayList;
+
 
 public class TouchExample extends View {
+
+    private ArrayList<String> images;
+
+
     private static final int MAX_POINTERS = 5;
     private float mScale = 1f;
     private GestureDetector mGestureDetector;
@@ -109,7 +120,13 @@ public class TouchExample extends View {
             mScale *= detector.getScaleFactor();
             mPaint.setTextSize(mScale*mFontSize);
             invalidate();
+
             return true;
         }
     }
+
+
+
+
+
 }
