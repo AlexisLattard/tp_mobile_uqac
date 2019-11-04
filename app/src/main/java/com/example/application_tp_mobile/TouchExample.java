@@ -40,7 +40,10 @@ public class TouchExample extends View {
     private int widthScreen = getResources().getDisplayMetrics().widthPixels;
     private int heightScreen = getResources().getDisplayMetrics().heightPixels;
 
-    private int nbImageLigne = 7;
+    private int nbImageLigne = 5;
+    private float touchPositionY = 0;
+    private float mouvement = 0;
+    private int numeroImage = 0;
 
     public TouchExample(Context context) {
         super(context);
@@ -147,7 +150,7 @@ public class TouchExample extends View {
 
         int positionX = 0;
         int nbLigne =(int) (heightScreen / (widthScreen / nbImageLigne));
-        int numeroImage = 0;
+
 
         for (int positionY = 0; positionY < nbLigne; positionY++) {
             for (int i = 0; i < nbImageLigne; i++) {
@@ -177,7 +180,7 @@ public class TouchExample extends View {
 
         int pointerCount = Math.min(event.getPointerCount(), MAX_POINTERS);
         switch (event.getAction() & MotionEvent.ACTION_MASK) {
-            case MotionEvent.ACTION_DOWN:
+            case (MotionEvent.ACTION_DOWN):
             case MotionEvent.ACTION_POINTER_DOWN:
             case MotionEvent.ACTION_MOVE:
                 // clear previous pointers
@@ -224,6 +227,34 @@ public class TouchExample extends View {
             invalidate();
             return true;
         }
+
+        @Override
+        public boolean onDown(MotionEvent e){
+            if(e.getAction() == MotionEvent.ACTION_DOWN) {
+                Log.d("MOVE", "ONDOWN)");
+            }
+            return true;
+        }
+//TODO pne recharge pas les anciennes images et saute plus d'une ligne
+        @Override
+        public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY){
+             mouvement += touchPositionY +distanceY;
+             if(mouvement>250){
+                 Log.d("MOVE", "MOUVE DOWN");
+                 numeroImage = numeroImage+1;
+                 mouvement =0;
+             }
+            if(mouvement<-250){
+                Log.d("MOVE", "MOUVE UP");
+
+                    numeroImage = numeroImage-1;
+                mouvement =0;
+            }
+           // Log.d("MOVE", "Y : "+distanceY +" mouv " +mouvement);
+            touchPositionY  = distanceY;
+            return true;
+        }
+
     }
 
     public class ScaleGesture extends ScaleGestureDetector.SimpleOnScaleGestureListener {
