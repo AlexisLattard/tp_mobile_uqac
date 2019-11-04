@@ -36,7 +36,8 @@ public class TouchExample extends View {
 
     private Canvas canvas;
     private ArrayList<BitmapDrawable> imageList = new ArrayList<BitmapDrawable>();
-
+    private int widthScreen = getResources().getDisplayMetrics().widthPixels;
+    private int heightScreen = getResources().getDisplayMetrics().heightPixels;
 
 
     public TouchExample(Context context) {
@@ -58,18 +59,19 @@ public class TouchExample extends View {
 
     /**
      * charge une image
+     *
      * @param numeroPicture
      * @return
      */
-    public BitmapDrawable loadImage(final int numeroPicture, Rect zone){
+    public BitmapDrawable loadImage(final int numeroPicture, Rect zone) {
 
         final BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(singleton.getInstance().imagePathList.get(numeroPicture),options);
-        options.inSampleSize = calculateInSampleSize(options, zone.right-zone.left, zone.bottom-zone.bottom);
+        BitmapFactory.decodeFile(singleton.getInstance().imagePathList.get(numeroPicture), options);
+        options.inSampleSize = calculateInSampleSize(options, zone.right - zone.left, zone.bottom - zone.bottom);
         // Decode bitmap with inSampleSize set
         options.inJustDecodeBounds = false;
-        Bitmap bitmap = BitmapFactory.decodeFile(singleton.getInstance().imagePathList.get(numeroPicture),options);
+        Bitmap bitmap = BitmapFactory.decodeFile(singleton.getInstance().imagePathList.get(numeroPicture), options);
         return new BitmapDrawable(getResources(), bitmap);
 
     }
@@ -108,7 +110,7 @@ public class TouchExample extends View {
     public void drawPicture(final int numeroPicture, final Rect zone, final Canvas canvas) {
 
 
-       BitmapDrawable image = loadImage(numeroPicture,zone);
+        BitmapDrawable image = loadImage(numeroPicture, zone);
 
 
 
@@ -128,34 +130,36 @@ public class TouchExample extends View {
         image.draw(canvas);
 
 
-
     }
 
-    public void initGalleryLigne(int positionY) {
+    /**
+     * charge et affiche un nombre d'image par ligne choisi
+     * @param nbImageLigne nombre d'image sur une ligne
+     */
+    public void refrshGallery(int nbImageLigne) {
 
-        int widthScreen = getResources().getDisplayMetrics().widthPixels;
-        int heightScreen = getResources().getDisplayMetrics().heightPixels;
+
         int positionX = 0;
+        int nbLigne = heightScreen / (widthScreen / nbImageLigne);
+        int numeroImage = 0;
 
-
-            for (int i = 0; i < 7; i++) {
-                positionX = i * (widthScreen / 7);
-                drawPicture(i, new Rect(positionX, positionY * (widthScreen / 7), positionX + (widthScreen / 7), (widthScreen / 7) + positionY * (widthScreen / 7)), canvas);
-
+        for (int positionY = 0; positionY < nbLigne; positionY++) {
+            for (int i = 0; i < nbImageLigne; i++) {
+                positionX = i * (widthScreen / nbImageLigne);
+                drawPicture(numeroImage, new Rect(positionX, positionY * (widthScreen / nbImageLigne), positionX + (widthScreen / nbImageLigne), (widthScreen / nbImageLigne) + positionY * (widthScreen / nbImageLigne)), canvas);
+                numeroImage++;
             }
-            Log.d("INITGALLERY", "positionY = " + positionY);
+            Log.d("INITGALLERY", "positionY = " + positionY+"total Ligne = "+nbLigne);
         }
-
+    }
 
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-this.canvas = canvas;
-for(int j = 0; j<10;j++) {
-    initGalleryLigne(j);
-}
+        this.canvas = canvas;
 
+        refrshGallery(5);
         // canvas.drawBitmap(image.getBitmap(), 0, 0, mPaint);
         Log.d("DRAW", "onDraw(Canvas canvas)");
     }
