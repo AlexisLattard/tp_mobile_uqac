@@ -32,7 +32,13 @@ public class TouchExample extends View {
     private Pointer[] mPointers = new Pointer[MAX_POINTERS];
     private Paint mPaint;
     private float mFontSize;
-    Canvas canvas;
+
+
+    private Canvas canvas;
+    private ArrayList<BitmapDrawable> imageList = new ArrayList<BitmapDrawable>();
+
+
+
     public TouchExample(Context context) {
         super(context);
         for (int i = 0; i < MAX_POINTERS; i++) {
@@ -51,16 +57,58 @@ public class TouchExample extends View {
     }
 
     /**
-     * affiche une image choisi de imagePathList dans une zone de l'écran donnée
+     * charge une image
+     * @param numeroPicture
+     * @return
+     */
+    public BitmapDrawable loadImage(final int numeroPicture, Rect zone){
+
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(singleton.getInstance().imagePathList.get(numeroPicture),options);
+        options.inSampleSize = calculateInSampleSize(options, zone.right-zone.left, zone.bottom-zone.bottom);
+        // Decode bitmap with inSampleSize set
+        options.inJustDecodeBounds = false;
+        Bitmap bitmap = BitmapFactory.decodeFile(singleton.getInstance().imagePathList.get(numeroPicture),options);
+        return new BitmapDrawable(getResources(), bitmap);
+
+    }
+
+    public static int calculateInSampleSize(
+            BitmapFactory.Options options, int reqWidth, int reqHeight) {
+        // Raw height and width of image
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
+
+        if (height > reqHeight || width > reqWidth) {
+
+            final int halfHeight = height / 2;
+            final int halfWidth = width / 2;
+
+            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
+            // height and width larger than the requested height and width.
+            while ((halfHeight / inSampleSize) >= reqHeight
+                    && (halfWidth / inSampleSize) >= reqWidth) {
+                inSampleSize *= 2;
+            }
+        }
+
+        return inSampleSize;
+    }
+
+
+    /**
+     * affiche une image choisi de imageList ou (imagePathList si elle n'est pas déja chargé) dans une zone de l'écran donnée
      *
-     * @param numberPicture numero de l'image dans imagePathList
+     * @param numeroPicture numero de l'image dans imagePathList
      * @param zone          position et taille de l'image
      * @param canvas
      */
-    public void drawPicture(int numberPicture, Rect zone, Canvas canvas) {
+    public void drawPicture(final int numeroPicture, final Rect zone, final Canvas canvas) {
 
 
-        BitmapDrawable image = new BitmapDrawable(getResources(), singleton.getInstance().imagePathList.get(numberPicture)); // on recupere l'image
+       BitmapDrawable image = loadImage(numeroPicture,zone);
 
 
 
@@ -78,6 +126,8 @@ public class TouchExample extends View {
         mPaint.setFilterBitmap(true);
 
         image.draw(canvas);
+
+
 
     }
 
@@ -102,8 +152,9 @@ public class TouchExample extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 this.canvas = canvas;
-
-        initGalleryLigne(0);
+for(int j = 0; j<10;j++) {
+    initGalleryLigne(j);
+}
 
         // canvas.drawBitmap(image.getBitmap(), 0, 0, mPaint);
         Log.d("DRAW", "onDraw(Canvas canvas)");
