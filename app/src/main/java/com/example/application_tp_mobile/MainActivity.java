@@ -28,13 +28,16 @@ public class MainActivity extends AppCompatActivity {
         TouchExample view = new TouchExample(this);
         setContentView(view);
 
+        //TODO faire le test selon les SDK
+
+// on verifie qu'on a acces au stockage
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.READ_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
 
 
             Log.d("IMAGES", "IS NOT GRANTED");
-
+//  si ce n'est pas le cas on demande l'autorisation
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
                     MY_PERMISSIONS_REQUEST_EXTERNAL_STORAGE);
@@ -42,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
             // Permission is not granted
 
             }
-
+// on recupere les path
         Cursor mCursor = getContentResolver()
                 .query(
                         MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
@@ -56,47 +59,13 @@ public class MainActivity extends AppCompatActivity {
             Log.d("IMAGES", " - _ID : " + mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.Media._ID)));
             Log.d("IMAGES", " - File Name : " + mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.Media.DISPLAY_NAME)));
             Log.d("IMAGES", " - File Path : " + mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.Media.DATA)));
+            singleton.getInstance().imagePathList.add(mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.Media.DATA)));
             mCursor.moveToNext();
         }
         mCursor.close();
 
 
-/*
-        final String[] columns = {
-                MediaStore.Images.Media.DATA,
-                MediaStore.Images.Media._ID,
-                MediaStore.Images.Media.DISPLAY_NAME,
-                MediaStore.Images.Media.BUCKET_DISPLAY_NAME
-        };
-        final String orderBy = MediaStore.Images.Media.DISPLAY_NAME;
 
-        Cursor cursor = this.getContentResolver().query(
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, null,
-                null, orderBy);
-
-       String mExternalStoragePath = Environment.getExternalStorageDirectory().getAbsolutePath();
-
-        int mCount = cursor.getCount();
-// mAbsolutePath is the absolute path (e.g. //emulated/0/folder/picture.png)
-       String[] mAbsolutePath = new String[mCount];
-        String[] mDisplayName = new String[mCount];
-// mFolderIntentPath is what will eventually become the folder path (e.g. //emulated/0/folder/)
-        String[] mFolderIntentPath = new String[mCount];
-        String[] mBucket = new String[mCount];
-
-        for (int i = 0; i < mCount; i++) {
-            cursor.moveToPosition(i);
-            int absolutePathColumnIndex = cursor.getColumnIndex(MediaStore.Images.Media.DATA);
-            int displayNameColumnIndex = cursor.getColumnIndex(MediaStore.Images.Media.DISPLAY_NAME);
-            int bucketColumnIndex = cursor.getColumnIndex(MediaStore.Images.Media.BUCKET_DISPLAY_NAME);
-
-            mAbsolutePath[i]= cursor.getString(absolutePathColumnIndex);
-            mDisplayName[i] = cursor.getString(displayNameColumnIndex);
-            mBucket[i] = cursor.getString(bucketColumnIndex);
-            mFolderIntentPath[i] = mAbsolutePath[i].substring(0, mAbsolutePath[i].lastIndexOf('/'));
-            Log.d("IMAGES", "absol path : "+mAbsolutePath[i] + "name : "+ mDisplayName[i]);
-        }
-*/
 
 
 
