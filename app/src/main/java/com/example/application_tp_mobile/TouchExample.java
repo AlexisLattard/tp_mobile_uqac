@@ -43,7 +43,7 @@ public class TouchExample extends View {
     private int nbImageLigne = 5;
     private float touchPositionY = 0;
     private float mouvement = 0;
-    private int numeroImage = 0;
+    private int index = 0;
 
     public TouchExample(Context context) {
         super(context);
@@ -147,7 +147,7 @@ public class TouchExample extends View {
      */
     public void refrshGallery(int nbImageLigne) {
 
-
+        int numeroImage = 0+index;
         int positionX = 0;
         int nbLigne =(int) (heightScreen / (widthScreen / nbImageLigne));
 
@@ -169,6 +169,7 @@ public class TouchExample extends View {
         this.canvas = canvas;
 
         refrshGallery(nbImageLigne);
+        
         // canvas.drawBitmap(image.getBitmap(), 0, 0, mPaint);
         Log.d("DRAW", "onDraw(Canvas canvas)");
     }
@@ -239,18 +240,20 @@ public class TouchExample extends View {
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY){
              mouvement += touchPositionY +distanceY;
-             if(mouvement>250){
-                 Log.d("MOVE", "MOUVE DOWN");
-                 numeroImage = numeroImage+1;
+             if(mouvement>800){
+                 Log.d("MOVE", "MOUVE DOWN ");
+                 touchPositionY  = distanceY;
+                 index = index+nbImageLigne;
                  mouvement =0;
              }
-            if(mouvement<-250){
-                Log.d("MOVE", "MOUVE UP");
+            if(mouvement<-800){
+                Log.d("MOVE", "MOUVE UP ");
+                touchPositionY  = distanceY;
 
-                    numeroImage = numeroImage-1;
+                    index = index-nbImageLigne;
                 mouvement =0;
             }
-           // Log.d("MOVE", "Y : "+distanceY +" mouv " +mouvement);
+           Log.d("MOVE", "Y : "+distanceY +" mouv " +mouvement+"index = "+index);
             touchPositionY  = distanceY;
             return true;
         }
