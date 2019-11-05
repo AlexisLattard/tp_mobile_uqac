@@ -11,6 +11,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ScaleDrawable;
+import android.os.HandlerThread;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -20,6 +21,7 @@ import android.view.View;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.logging.Handler;
 
 
 public class TouchExample extends View {
@@ -59,6 +61,7 @@ public class TouchExample extends View {
         mGestureDetector = new GestureDetector(context, new ZoomGesture());
         mScaleGestureDetector = new ScaleGestureDetector(context, new ScaleGesture());
 
+        preLoadedThread();
 
     }
 
@@ -79,14 +82,46 @@ public class TouchExample extends View {
             options.inJustDecodeBounds = false;
             Bitmap bitmap = BitmapFactory.decodeFile(singleton.getInstance().imagePathList.get(numeroPicture), options);
             imageList.put(numeroPicture,new BitmapDrawable(getResources(), bitmap));
-            Log.d("LOAD", "image chargé");
+          //  Log.d("LOAD", "image chargé");
         }else{
-            Log.d("LOAD", "image exist déja, key = "+imageList.get(numeroPicture));
+           // Log.d("LOAD", "image exist déja, key = "+imageList.get(numeroPicture));
         }
 
         return imageList.get(numeroPicture);
 
     }
+
+    public void preLoad(int nbImagePreloaded,int decalage){
+        int indexLastImageAffiche = index*nbImageLigne+decalage;
+
+        for (int i = indexLastImageAffiche;i<indexLastImageAffiche+nbImagePreloaded;i++){
+            loadImage(i,new Rect(1, 1 * (widthScreen / nbImageLigne), 1 + (widthScreen / nbImageLigne), (widthScreen / nbImageLigne) + 1 * (widthScreen / nbImageLigne)));
+            Log.d("LOAD","preLoaded image : "+i);
+        }
+        //Log.d("LOAD","Images preLoaded");
+
+    }
+public void preLoadedThread(){
+        ArrayList<Thread> threads = new ArrayList<>();
+
+        for(int i=0;i<3;i++) {
+            final int finalI = i;
+
+           threads.add( new Thread(new Runnable() {
+                public void run() {
+                    Log.d("LOADTREAD", "Thread PRE loaded ID------------------- :"+finalI);
+                    preLoad(nbImageLigne*3,3*nbImageLigne+(nbImageLigne* finalI));
+                    Log.d("LOADTREAD", "Thread PRE loaded ID____________________ :"+finalI);
+
+                }
+            }));
+           threads.get(i).start();
+
+        }
+
+
+}
+
 
     public static int calculateInSampleSize(
             BitmapFactory.Options options, int reqWidth, int reqHeight) {
@@ -168,8 +203,16 @@ public class TouchExample extends View {
         super.onDraw(canvas);
         this.canvas = canvas;
 
+        //securité pour ne pas chercher une image qui n'existe pas
+        if(index<=0){
+            index=0;
+        }
+        if (index >= singleton.getInstance().imagePathList.size()){
+            index = singleton.getInstance().imagePathList.size();
+        }
         refrshGallery(nbImageLigne);
-        
+        preLoadedThread();
+
         // canvas.drawBitmap(image.getBitmap(), 0, 0, mPaint);
         Log.d("DRAW", "onDraw(Canvas canvas)");
     }

@@ -20,8 +20,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        TouchExample view = new TouchExample(this);
-        setContentView(view);
+
 
         //TODO faire le test selon les SDK
 
@@ -59,7 +58,8 @@ public class MainActivity extends AppCompatActivity {
         }
         mCursor.close();
 
-
+        TouchExample view = new TouchExample(this);
+        setContentView(view);
 
 
         
