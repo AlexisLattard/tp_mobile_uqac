@@ -7,6 +7,9 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.drawable.BitmapDrawable;
+import android.util.Log;
+import android.view.Display;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
@@ -17,98 +20,72 @@ import java.util.ArrayList;
 
 public class TouchExample extends View {
 
-    private static final int MAX_POINTERS = 5;
-    private ArrayList<String> images;
     private float mScale = 1f;
-    private GestureDetector mGestureDetector;
+    private float mScroll = 0f;
+    private GestureDetector mScrollGestureDetector;
     private ScaleGestureDetector mScaleGestureDetector;
 
-    private Pointer[] mPointers = new Pointer[MAX_POINTERS];
     private Paint mPaint;
     private float mFontSize;
 
     public TouchExample(Context context) {
         super(context);
-        for (int i = 0; i < MAX_POINTERS; i++) {
-            mPointers[i] = new Pointer();
-        }
 
         mFontSize = 16 * getResources().getDisplayMetrics().density;
         mPaint = new Paint();
         mPaint.setColor(Color.BLACK);
         mPaint.setTextSize(mFontSize);
 
-        mGestureDetector = new GestureDetector(context, new ZoomGesture());
+        mScrollGestureDetector = new GestureDetector(context, new ScrollGesture());
         mScaleGestureDetector = new ScaleGestureDetector(context, new ScaleGesture());
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        /*for (Pointer p : mPointers) {
-            if (p.index != -1) {
-                String text = "Index: " + p.index + " ID: " + p.id;
-                canvas.drawText(text, p.x, p.y, mPaint);
-            }
-        }*/
 
-        Bitmap image = BitmapFactory.decodeFile(singleton.getInstance().imagePathList.get(0));
-        mPaint.setFilterBitmap(true);
-        canvas.drawBitmap(image, 0, 0, mPaint);
+        ArrayList<String> urlList = singleton.getInstance().imagePathList;
+        int swidth = singleton.getInstance().screenWidth;
+        int sheight = singleton.getInstance().screenHeight;
+        int n = 7;
+        int largeur_image = swidth/n;
+        int nb_images = sheight / largeur_image * n + n;
+        Log.d("SIZE", ""+nb_images);
+        Log.d("SIZE", ""+sheight);
+        Log.d("SIZE", ""+largeur_image);
+        int start = (int) mScroll / largeur_image * n;
+        for (int i = start; i - start < nb_images && i < urlList.size(); i++) {
+            Bitmap image = BitmapFactory.decodeFile(urlList.get(i));
+            image = Bitmap.createScaledBitmap(image,largeur_image,largeur_image,false);
+            mPaint.setFilterBitmap(true);
+            canvas.drawBitmap(image, (i%n)*largeur_image, (i/n)*largeur_image-mScroll, mPaint);
+        }
+    }
+
+    @Override
+    public void setOnScrollChangeListener(OnScrollChangeListener l) {
+        super.setOnScrollChangeListener(l);
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        mGestureDetector.onTouchEvent(event);
+        mScrollGestureDetector.onTouchEvent(event);
         mScaleGestureDetector.onTouchEvent(event);
 
-        int pointerCount = Math.min(event.getPointerCount(), MAX_POINTERS);
-        switch (event.getAction() & MotionEvent.ACTION_MASK) {
-            case MotionEvent.ACTION_DOWN:
-            case MotionEvent.ACTION_POINTER_DOWN:
-            case MotionEvent.ACTION_MOVE:
-                // clear previous pointers
-                for (int id = 0; id < MAX_POINTERS; id++)
-                    mPointers[id].index = -1;
-
-                // Now fill in the current pointers
-                for (int i = 0; i < pointerCount; i++) {
-                    int id = event.getPointerId(i);
-                    Pointer pointer = mPointers[id];
-                    pointer.index = i;
-                    pointer.id = id;
-                    pointer.x = event.getX(i);
-                    pointer.y = event.getY(i);
-                }
-                invalidate();
-                break;
-            case MotionEvent.ACTION_CANCEL:
-                for (int i = 0; i < pointerCount; i++) {
-                    int id = event.getPointerId(i);
-                    mPointers[id].index = -1;
-                }
-                invalidate();
-                break;
-        }
         return true;
     }
 
-    class Pointer {
-        float x = 0;
-        float y = 0;
-        int index = -1;
-        int id = -1;
-    }
-
-    public class ZoomGesture extends GestureDetector.SimpleOnGestureListener {
-        private boolean normal = true;
+    public class ScrollGesture extends GestureDetector.SimpleOnGestureListener {
 
         @Override
-        public boolean onDoubleTap(MotionEvent e) {
-            mScale = normal ? 3f : 1f;
-            mPaint.setTextSize(mScale * mFontSize);
-            normal = !normal;
-            invalidate();
+        public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+            if (distanceY < 1 || distanceY > 1) {
+                if (mScroll + distanceY < 0) mScroll = 0;
+                else mScroll += distanceY;
+                Log.d("SCROLL",""+mScroll);
+                invalidate();
+            }
+
             return true;
         }
     }
@@ -123,6 +100,4 @@ public class TouchExample extends View {
             return true;
         }
     }
-
-
 }

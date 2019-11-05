@@ -3,9 +3,11 @@ package com.example.application_tp_mobile;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.Display;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -20,8 +22,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        TouchExample view = new TouchExample(this);
-        setContentView(view);
+        Display d = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        d.getSize(size);
+        int width = size.x;
+        int height = size.y;
+        singleton.getInstance().setScreenWidth(width);
+        singleton.getInstance().setScreenHeight(height);
 
         //TODO faire le test selon les SDK
 
@@ -40,27 +47,34 @@ public class MainActivity extends AppCompatActivity {
             // Permission is not granted
 
         }
+
+        String selection = MediaStore.Images.Media.BUCKET_DISPLAY_NAME + " = ? ";
+        String[] columns = { MediaStore.Images.Media.DATA, MediaStore.Images.Media.BUCKET_DISPLAY_NAME };
+        String selectionArgs[] = {"Camera"};
+
 // on recupere les path
         Cursor mCursor = getContentResolver()
                 .query(
                         MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                        null,
-                        null,
-                        null,
+                        columns,
+                        selection,
+                        selectionArgs,
                         MediaStore.Images.Media.DEFAULT_SORT_ORDER);
 
         mCursor.moveToFirst();
         while (!mCursor.isAfterLast()) {
-            Log.d("IMAGES", " - _ID : " + mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.Media._ID)));
+            /*Log.d("IMAGES", " - _ID : " + mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.Media._ID)));
             Log.d("IMAGES", " - File Name : " + mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.Media.DISPLAY_NAME)));
-            Log.d("IMAGES", " - File Path : " + mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.Media.DATA)));
+            Log.d("IMAGES", " - File Path : " + mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.Media.DATA)));*/
             singleton.getInstance().imagePathList.add(mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.Media.DATA)));
             mCursor.moveToNext();
         }
         mCursor.close();
 
-
+        TouchExample view = new TouchExample(this);
+        setContentView(view);
     }
+
 
 
 }
