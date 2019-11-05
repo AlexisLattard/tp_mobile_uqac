@@ -11,6 +11,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+/**
+ * classe principal permettant d'afficher la vue, d'obtenir les droits d'acces au stockage
+ * et de scanner le device
+ */
 public class MainActivity extends AppCompatActivity {
     final static int GALLERY_REQUEST_CODE = 10;
     final static int MY_PERMISSIONS_REQUEST_EXTERNAL_STORAGE = 3;
@@ -39,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
             // Permission is not granted
 
         }
-// on recupere les path
+// scan et  recupere les chemins d'acces au images
         Cursor mCursor = getContentResolver()
                 .query(
                         MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
@@ -57,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
             mCursor.moveToNext();
         }
         mCursor.close();
-
+// on creer et affiche l'interface
         TouchExample view = new TouchExample(this);
         setContentView(view);
 

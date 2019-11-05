@@ -23,6 +23,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Handler;
 
+/**
+ * sert d'interface utilisateur avec chargment et affichages des images, gestion des inputs utilisateurs et
+ */
 
 public class TouchExample extends View {
 
@@ -42,11 +45,15 @@ public class TouchExample extends View {
     private int widthScreen = getResources().getDisplayMetrics().widthPixels;
     private int heightScreen = getResources().getDisplayMetrics().heightPixels;
 
-    private int nbImageLigne = 5;
-    private float touchPositionY = 0;
-    private float mouvement = 0;
-    private int index = 0;
+    private int nbImageLigne = 5; // nombre d image sur une ligne
+    private float touchPositionY = 0; // derniere vitesse du doit connue dans la direction Y (pour le drag)
+    private float mouvement = 0; // determine la distance du mouvement (pour le drag)
+    private int index = 0; // correspond a l'index de l'image visible en haut a gauche dans la liste  imagePathList
 
+    /**
+     * construteur qui precharge  des images
+     * @param context
+     */
     public TouchExample(Context context) {
         super(context);
         for (int i = 0; i < MAX_POINTERS; i++) {
@@ -66,10 +73,10 @@ public class TouchExample extends View {
     }
 
     /**
-     * charge une image
+     * charge une image selon les dimension voulu
      *
-     * @param numeroPicture
-     * @return
+     * @param numeroPicture index de l'image dans imagePathList
+     * @return l'image charger
      */
     public BitmapDrawable loadImage( Integer numeroPicture, Rect zone) {
         // on verifie que l'image n'est pas déja chargé
@@ -91,6 +98,12 @@ public class TouchExample extends View {
 
     }
 
+    /**
+     * permet de charger des images dans la liste d'images
+     *
+     * @param nbImagePreloaded nombre d'image a charger
+     * @param decalage + index = indice de la 1er image a charger
+     */
     public void preLoad(int nbImagePreloaded,int decalage){
         int indexLastImageAffiche = index*nbImageLigne+decalage;
 
@@ -101,7 +114,11 @@ public class TouchExample extends View {
         //Log.d("LOAD","Images preLoaded");
 
     }
-public void preLoadedThread(){
+
+    /**
+     * charge des images dans des threads séparés
+     */
+    public void preLoadedThread(){
         ArrayList<Thread> threads = new ArrayList<>();
 
         for(int i=0;i<3;i++) {
@@ -122,6 +139,13 @@ public void preLoadedThread(){
 
 }
 
+    /**
+     *  permet de determiner le format a chargé
+     * @param options
+     * @param reqWidth
+     * @param reqHeight
+     * @return
+     */
 
     public static int calculateInSampleSize(
             BitmapFactory.Options options, int reqWidth, int reqHeight) {
@@ -199,7 +223,7 @@ public void preLoadedThread(){
 
 
     @Override
-    protected void onDraw(Canvas canvas) {
+    protected void onDraw(Canvas canvas) { // fonction qui redessine l'écran
         super.onDraw(canvas);
         this.canvas = canvas;
 
@@ -279,7 +303,9 @@ public void preLoadedThread(){
             }
             return true;
         }
-//TODO pne recharge pas les anciennes images et saute plus d'une ligne
+/*
+Permet d'effectuer le scrolling a l'écran ( drag )
+ */
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY){
              mouvement += touchPositionY +distanceY;
@@ -302,7 +328,9 @@ public void preLoadedThread(){
         }
 
     }
-
+/*
+class utilisé pour gerer le nombre d'image sur une ligne a partid u geste de zoom/ dezoom de l'utilsiateur
+ */
     public class ScaleGesture extends ScaleGestureDetector.SimpleOnScaleGestureListener {
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
