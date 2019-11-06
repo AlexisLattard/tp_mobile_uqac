@@ -25,10 +25,10 @@ public class ImageGallery extends View {
 
     private static final int MAX_POINTERS = 5;
     private static final int initialMaxImgPerLine = 4; //nombre d'image au démarrage de l'application
-    private float mScale = 1f;
+    private float mScale;
     private GestureDetector mGestureDetector;
     private ScaleGestureDetector mScaleGestureDetector;
-    private Pointer[] mPointers = new Pointer[MAX_POINTERS];
+    private Pointer[] mPointers;
     private Paint mPaint;
     private float mFontSize;
     private Canvas canvas;
@@ -48,6 +48,16 @@ public class ImageGallery extends View {
      */
     public ImageGallery(Context context) {
         super(context);
+
+        this.mScale = 1f;
+        this.mPointers = new Pointer[MAX_POINTERS];
+        this.imageList = new HashMap<>();
+        this.screenWidth = getResources().getDisplayMetrics().widthPixels;
+        this.screenHeight = getResources().getDisplayMetrics().heightPixels;
+        this.touchPositionY = 0;
+        this.delta = 0;
+        this.index = 0;
+
         for (int i = 0; i < MAX_POINTERS; i++) {
             mPointers[i] = new Pointer();
         }
@@ -61,14 +71,6 @@ public class ImageGallery extends View {
         mScaleGestureDetector = new ScaleGestureDetector(context, new ScaleGesture());
         maxImgPerLine = initialMaxImgPerLine;
         preLoadThread();
-
-        this.imageList = new HashMap<>();
-        this.screenWidth = getResources().getDisplayMetrics().widthPixels;
-        this.screenHeight = getResources().getDisplayMetrics().heightPixels;
-        this.touchPositionY = 0;
-        this.delta = 0;
-        this.index = 0;
-
     }
 
     /**
