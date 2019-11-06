@@ -51,7 +51,7 @@ public class TouchExample extends View {
     private float touchPositionY = 0; // derniere vitesse du doit connue dans la direction Y (pour le drag)
     private float mouvement = 0; // determine la distance du mouvement (pour le drag)
     private int index = 0; // correspond a l'index de l'image visible en haut a gauche dans la liste  imagePathList
-    private static final int refNbImageLigne = 5;
+    private static final int refNbImageLigne = 7;
 
     /**
      * construteur qui precharge  des images
@@ -342,7 +342,7 @@ public class TouchExample extends View {
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
             mScale *= detector.getScaleFactor();
-/*
+
             int valeur = (int) ((Math.abs(mScale) * 0.1) % 7);
             Log.d("GESTURE", "mScale = " + mScale + "nb ligne : " + valeur);
             if (mScale < 0) {
@@ -352,7 +352,7 @@ public class TouchExample extends View {
             } else {
                 nbImageLigne = 7 - valeur;
             }
-*/
+/*
 
             int valeur = 0;
 
@@ -376,7 +376,7 @@ public class TouchExample extends View {
             } else if (nbImageLigne < 1) {
                 nbImageLigne = 1;
             }
-
+*/
             invalidate();
 
             return true;
