@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.logging.Handler;
 
 /**
- * sert d'interface utilisateur avec chargment et affichages des images, gestion des inputs utilisateurs et
+ * sert d'interface utilisateur avec chargement et affichages des images, gestion des inputs utilisateurs.
  */
 
 public class TouchExample extends View {
@@ -51,8 +51,8 @@ public class TouchExample extends View {
     private float touchPositionY = 0; // derniere vitesse du doit connue dans la direction Y (pour le drag)
     private float mouvement = 0; // determine la distance du mouvement (pour le drag)
     private int index = 0; // correspond a l'index de l'image visible en haut a gauche dans la liste  imagePathList
-    private static final int refNbImageLigne = 7; //nombre d'image au demarage de l'application
-
+    private static final int refNbImageLigne = 4; //nombre d'image au demarage de l'application
+    private  Thread thread; // utliser pour precharger les images en arrière plan
     /**
      * construteur qui precharge  des images
      *
@@ -123,23 +123,20 @@ public class TouchExample extends View {
      * charge des images dans des threads séparés
      */
     public void preLoadedThread() {
-        ArrayList<Thread> threads = new ArrayList<>();
 
-        //  for(int i=0;i<3;i++) {
+        final int nbLigne = (int) (heightScreen / (widthScreen / nbImageLigne));
+
         final int finalI = 0; //i;
 
-        threads.add(new Thread(new Runnable() {
+        thread = new Thread(new Runnable() {
             public void run() {
-                Log.d("LOADTREAD", "Thread PRE loaded ID------------------- :" + finalI);
-                preLoad(nbImageLigne * 3, 3 * nbImageLigne + (nbImageLigne * finalI));
-                Log.d("LOADTREAD", "Thread PRE loaded ID____________________ :" + finalI);
+                //Log.d("LOADTREAD", "Thread PRE loaded ID------------------- :" + finalI);
+                preLoad((int) ((nbImageLigne * nbLigne)/2), index+(nbImageLigne *nbLigne));
+                //Log.d("LOADTREAD", "Thread PRE loaded ID____________________ :" + finalI);
 
             }
-        }));
-        threads.get(finalI).start();
-
-        //}
-
+        });
+        thread.start();
 
     }
 
@@ -222,7 +219,7 @@ public class TouchExample extends View {
                 numeroImage++;
 
             }
-            Log.d("INITGALLERY", "positionY = " + positionY + "total Ligne = " + nbLigne);
+           // Log.d("INITGALLERY", "positionY = " + positionY + "total Ligne = " + nbLigne);
         }
     }
 
@@ -243,7 +240,7 @@ public class TouchExample extends View {
         refrshGallery(nbImageLigne);
 
         // canvas.drawBitmap(image.getBitmap(), 0, 0, mPaint);
-        Log.d("DRAW", "onDraw(Canvas canvas)");
+       // Log.d("DRAW", "onDraw(Canvas canvas)");
     }
 
     @Override
@@ -251,34 +248,10 @@ public class TouchExample extends View {
         mGestureDetector.onTouchEvent(event);
         mScaleGestureDetector.onTouchEvent(event);
 
-        int pointerCount = Math.min(event.getPointerCount(), MAX_POINTERS);
-        switch (event.getAction() & MotionEvent.ACTION_MASK) {
-            case (MotionEvent.ACTION_DOWN):
-            case MotionEvent.ACTION_POINTER_DOWN:
-            case MotionEvent.ACTION_MOVE:
-                // clear previous pointers
-                for (int id = 0; id < MAX_POINTERS; id++)
-                    mPointers[id].index = -1;
 
-                // Now fill in the current pointers
-                for (int i = 0; i < pointerCount; i++) {
-                    int id = event.getPointerId(i);
-                    Pointer pointer = mPointers[id];
-                    pointer.index = i;
-                    pointer.id = id;
-                    pointer.x = event.getX(i);
-                    pointer.y = event.getY(i);
-                }
                 invalidate();
-                break;
-            case MotionEvent.ACTION_CANCEL:
-                for (int i = 0; i < pointerCount; i++) {
-                    int id = event.getPointerId(i);
-                    mPointers[id].index = -1;
-                }
-                invalidate();
-                break;
-        }
+
+
         return true;
     }
 
@@ -316,19 +289,19 @@ public class TouchExample extends View {
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
             mouvement += touchPositionY + distanceY;
             if (mouvement > 800) {
-                Log.d("MOVE", "MOUVE DOWN ");
+               // Log.d("MOVE", "MOUVE DOWN ");
                 touchPositionY = distanceY;
                 index = index + nbImageLigne;
                 mouvement = 0;
             }
             if (mouvement < -800) {
-                Log.d("MOVE", "MOUVE UP ");
+               // Log.d("MOVE", "MOUVE UP ");
                 touchPositionY = distanceY;
 
                 index = index - nbImageLigne;
                 mouvement = 0;
             }
-            Log.d("MOVE", "Y : " + distanceY + " mouv " + mouvement + "index = " + index);
+         //   Log.d("MOVE", "Y : " + distanceY + " mouv " + mouvement + "index = " + index);
             touchPositionY = distanceY;
             return true;
         }
@@ -342,7 +315,9 @@ public class TouchExample extends View {
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
             mScale *= detector.getScaleFactor();
+            thread.interrupt(); // on stop le prechargement des images car on change de resolution
             nbImageLigne = ( int) (refNbImageLigne/mScale);
+
             // securité limite nombre d'image
             if (nbImageLigne > 7) {
                 nbImageLigne = 7;
@@ -350,42 +325,8 @@ public class TouchExample extends View {
                 nbImageLigne = 1;
             }
 
-            Log.d("GESTURE", "mScale = " + mScale + "nb ligne : " + nbImageLigne);
-/*
-            int valeur = (int) ((Math.abs(mScale) * 0.1) % 7);
-            Log.d("GESTURE", "mScale = " + mScale + "nb ligne : " + valeur);
-            if (mScale < 0) {
-                nbImageLigne = 7;
-            } else if (mScale > 65) {
-                nbImageLigne = 1;
-            } else {
-                nbImageLigne = 7 - valeur;
-            }*/
-/*
+           // Log.d("GESTURE", "mScale = " + mScale + "nb ligne : " + nbImageLigne);
 
-            int valeur = 0;
-
-
-
-
-            if (mScale <= 1) {
-                valeur = (int) (1/mScale);
-                nbImageLigne = refNbImageLigne + valeur;
-                Log.d("GESTURE", "msclae inferieur 1");
-            } else {
-                valeur = (int) ((Math.abs(mScale) * 0.1) % 7);
-                nbImageLigne = refNbImageLigne - valeur;
-                Log.d("GESTURE", "msclae Superieur 1");
-            }
-           // nbImageLigne = refNbImageLigne - valeur;
-            Log.d("GESTURE", "mScale = " + mScale + "nb ligne : " + valeur);
-            // securité limite nombre d'image
-            if (nbImageLigne > 7) {
-                nbImageLigne = 7;
-            } else if (nbImageLigne < 1) {
-                nbImageLigne = 1;
-            }
-*/
             invalidate();
 
             return true;

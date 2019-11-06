@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
             // Permission is not granted
 
         }
-// scan et  recupere les chemins d'acces au images
+// scan et  recupere les chemins d'acces au images stocké sur le device
         Cursor mCursor = getContentResolver()
                 .query(
                         MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
