@@ -32,9 +32,9 @@ public class ImageGallery extends View {
     private Paint mPaint;
     private float mFontSize;
     private Canvas canvas;
-    private HashMap<Integer, BitmapDrawable> imageList = new HashMap<>();
-    private int screenWidth = getResources().getDisplayMetrics().widthPixels;
-    private int screenHeight = getResources().getDisplayMetrics().heightPixels;
+    private HashMap<Integer, BitmapDrawable> imageList;
+    private int screenWidth;
+    private int screenHeight;
     private int maxImgPerLine; // nombre d'images sur une ligne
     private float touchPositionY; // dernière vitesse du doigt connue dans la direction Y (pour le drag)
     private float delta; // détermine la distance du mouvement (pour le drag)
@@ -62,6 +62,9 @@ public class ImageGallery extends View {
         maxImgPerLine = initialMaxImgPerLine;
         preLoadThread();
 
+        this.imageList = new HashMap<>();
+        this.screenWidth = getResources().getDisplayMetrics().widthPixels;
+        this.screenHeight = getResources().getDisplayMetrics().heightPixels;
         this.touchPositionY = 0;
         this.delta = 0;
         this.index = 0;
