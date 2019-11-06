@@ -11,6 +11,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ScaleDrawable;
+import android.os.AsyncTask;
 import android.os.HandlerThread;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -18,6 +19,7 @@ import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,13 +47,15 @@ public class TouchExample extends View {
     private int widthScreen = getResources().getDisplayMetrics().widthPixels;
     private int heightScreen = getResources().getDisplayMetrics().heightPixels;
 
-    private int nbImageLigne = 5; // nombre d image sur une ligne
+    private int nbImageLigne; // nombre d image sur une ligne
     private float touchPositionY = 0; // derniere vitesse du doit connue dans la direction Y (pour le drag)
     private float mouvement = 0; // determine la distance du mouvement (pour le drag)
     private int index = 0; // correspond a l'index de l'image visible en haut a gauche dans la liste  imagePathList
+    private static final int refNbImageLigne = 5;
 
     /**
      * construteur qui precharge  des images
+     *
      * @param context
      */
     public TouchExample(Context context) {
@@ -67,7 +71,7 @@ public class TouchExample extends View {
 
         mGestureDetector = new GestureDetector(context, new ZoomGesture());
         mScaleGestureDetector = new ScaleGestureDetector(context, new ScaleGesture());
-
+        nbImageLigne = refNbImageLigne;
         preLoadedThread();
 
     }
@@ -78,7 +82,7 @@ public class TouchExample extends View {
      * @param numeroPicture index de l'image dans imagePathList
      * @return l'image charger
      */
-    public BitmapDrawable loadImage( Integer numeroPicture, Rect zone) {
+    public BitmapDrawable loadImage(Integer numeroPicture, Rect zone) {
         // on verifie que l'image n'est pas déja chargé
         if (!imageList.containsKey(numeroPicture)) {
             final BitmapFactory.Options options = new BitmapFactory.Options();
@@ -88,10 +92,10 @@ public class TouchExample extends View {
             // Decode bitmap with inSampleSize set
             options.inJustDecodeBounds = false;
             Bitmap bitmap = BitmapFactory.decodeFile(singleton.getInstance().imagePathList.get(numeroPicture), options);
-            imageList.put(numeroPicture,new BitmapDrawable(getResources(), bitmap));
-          //  Log.d("LOAD", "image chargé");
-        }else{
-           // Log.d("LOAD", "image exist déja, key = "+imageList.get(numeroPicture));
+            imageList.put(numeroPicture, new BitmapDrawable(getResources(), bitmap));
+            // Log.d("LOAD", "image chargé");
+        } else {
+            // Log.d("LOAD", "image exist déja, key = " + imageList.get(numeroPicture));
         }
 
         return imageList.get(numeroPicture);
@@ -102,14 +106,14 @@ public class TouchExample extends View {
      * permet de charger des images dans la liste d'images
      *
      * @param nbImagePreloaded nombre d'image a charger
-     * @param decalage + index = indice de la 1er image a charger
+     * @param decalage         + index = indice de la 1er image a charger
      */
-    public void preLoad(int nbImagePreloaded,int decalage){
-        int indexLastImageAffiche = index*nbImageLigne+decalage;
+    public void preLoad(int nbImagePreloaded, int decalage) {
+        int indexLastImageAffiche = index * nbImageLigne + decalage;
 
-        for (int i = indexLastImageAffiche;i<indexLastImageAffiche+nbImagePreloaded;i++){
-            loadImage(i,new Rect(1, 1 * (widthScreen / nbImageLigne), 1 + (widthScreen / nbImageLigne), (widthScreen / nbImageLigne) + 1 * (widthScreen / nbImageLigne)));
-            Log.d("LOAD","preLoaded image : "+i);
+        for (int i = indexLastImageAffiche; i < indexLastImageAffiche + nbImagePreloaded; i++) {
+            loadImage(i, new Rect(1, 1 * (widthScreen / nbImageLigne), 1 + (widthScreen / nbImageLigne), (widthScreen / nbImageLigne) + 1 * (widthScreen / nbImageLigne)));
+            Log.d("LOAD", "preLoaded image : " + i);
         }
         //Log.d("LOAD","Images preLoaded");
 
@@ -118,29 +122,30 @@ public class TouchExample extends View {
     /**
      * charge des images dans des threads séparés
      */
-    public void preLoadedThread(){
+    public void preLoadedThread() {
         ArrayList<Thread> threads = new ArrayList<>();
 
-        for(int i=0;i<3;i++) {
-            final int finalI = i;
+        //  for(int i=0;i<3;i++) {
+        final int finalI = 0; //i;
 
-           threads.add( new Thread(new Runnable() {
-                public void run() {
-                    Log.d("LOADTREAD", "Thread PRE loaded ID------------------- :"+finalI);
-                    preLoad(nbImageLigne*3,3*nbImageLigne+(nbImageLigne* finalI));
-                    Log.d("LOADTREAD", "Thread PRE loaded ID____________________ :"+finalI);
+        threads.add(new Thread(new Runnable() {
+            public void run() {
+                Log.d("LOADTREAD", "Thread PRE loaded ID------------------- :" + finalI);
+                preLoad(nbImageLigne * 3, 3 * nbImageLigne + (nbImageLigne * finalI));
+                Log.d("LOADTREAD", "Thread PRE loaded ID____________________ :" + finalI);
 
-                }
-            }));
-           threads.get(i).start();
+            }
+        }));
+        threads.get(finalI).start();
 
-        }
+        //}
 
 
-}
+    }
 
     /**
-     *  permet de determiner le format a chargé
+     * permet de determiner le format a chargé
+     *
      * @param options
      * @param reqWidth
      * @param reqHeight
@@ -206,9 +211,9 @@ public class TouchExample extends View {
      */
     public void refrshGallery(int nbImageLigne) {
 
-        int numeroImage = 0+index;
+        int numeroImage = 0 + index;
         int positionX = 0;
-        int nbLigne =(int) (heightScreen / (widthScreen / nbImageLigne));
+        int nbLigne = (int) (heightScreen / (widthScreen / nbImageLigne));
 
 
         for (int positionY = 0; positionY < nbLigne; positionY++) {
@@ -228,10 +233,10 @@ public class TouchExample extends View {
         this.canvas = canvas;
 
         //securité pour ne pas chercher une image qui n'existe pas
-        if(index<=0){
-            index=0;
+        if (index <= 0) {
+            index = 0;
         }
-        if (index >= singleton.getInstance().imagePathList.size()){
+        if (index >= singleton.getInstance().imagePathList.size()) {
             index = singleton.getInstance().imagePathList.size();
         }
         refrshGallery(nbImageLigne);
@@ -290,61 +295,86 @@ public class TouchExample extends View {
         @Override
         public boolean onDoubleTap(MotionEvent e) {
             mScale = normal ? 3f : 1f;
-            mPaint.setTextSize(mScale * mFontSize);
+
             normal = !normal;
             invalidate();
             return true;
         }
 
         @Override
-        public boolean onDown(MotionEvent e){
-            if(e.getAction() == MotionEvent.ACTION_DOWN) {
+        public boolean onDown(MotionEvent e) {
+            if (e.getAction() == MotionEvent.ACTION_DOWN) {
                 Log.d("MOVE", "ONDOWN)");
             }
             return true;
         }
-/*
-Permet d'effectuer le scrolling a l'écran ( drag )
- */
-        @Override
-        public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY){
-             mouvement += touchPositionY +distanceY;
-             if(mouvement>800){
-                 Log.d("MOVE", "MOUVE DOWN ");
-                 touchPositionY  = distanceY;
-                 index = index+nbImageLigne;
-                 mouvement =0;
-             }
-            if(mouvement<-800){
-                Log.d("MOVE", "MOUVE UP ");
-                touchPositionY  = distanceY;
 
-                    index = index-nbImageLigne;
-                mouvement =0;
+        /*
+        Permet d'effectuer le scrolling a l'écran ( drag )
+         */
+        @Override
+        public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+            mouvement += touchPositionY + distanceY;
+            if (mouvement > 800) {
+                Log.d("MOVE", "MOUVE DOWN ");
+                touchPositionY = distanceY;
+                index = index + nbImageLigne;
+                mouvement = 0;
             }
-           Log.d("MOVE", "Y : "+distanceY +" mouv " +mouvement+"index = "+index);
-            touchPositionY  = distanceY;
+            if (mouvement < -800) {
+                Log.d("MOVE", "MOUVE UP ");
+                touchPositionY = distanceY;
+
+                index = index - nbImageLigne;
+                mouvement = 0;
+            }
+            Log.d("MOVE", "Y : " + distanceY + " mouv " + mouvement + "index = " + index);
+            touchPositionY = distanceY;
             return true;
         }
 
     }
-/*
-class utilisé pour gerer le nombre d'image sur une ligne a partid u geste de zoom/ dezoom de l'utilsiateur
- */
+
+    /*
+    class utilisé pour gerer le nombre d'image sur une ligne a partid u geste de zoom/ dezoom de l'utilsiateur
+     */
     public class ScaleGesture extends ScaleGestureDetector.SimpleOnScaleGestureListener {
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
             mScale *= detector.getScaleFactor();
-            mPaint.setTextSize(mScale * mFontSize);
-            int valeur = (int) ((Math.abs(mScale)*0.1)%7);
-            Log.d("GESTURE", "mScale = "+mScale+"nb ligne : "+valeur);
-            if(mScale<0){
+/*
+            int valeur = (int) ((Math.abs(mScale) * 0.1) % 7);
+            Log.d("GESTURE", "mScale = " + mScale + "nb ligne : " + valeur);
+            if (mScale < 0) {
                 nbImageLigne = 7;
-            }else if (mScale>65){
+            } else if (mScale > 65) {
                 nbImageLigne = 1;
-            }else
-            {
-                nbImageLigne = 7- valeur;
+            } else {
+                nbImageLigne = 7 - valeur;
+            }
+*/
+
+            int valeur = 0;
+
+
+
+
+            if (mScale <= 1) {
+                valeur = (int) (1/mScale);
+                nbImageLigne = refNbImageLigne + valeur;
+                Log.d("GESTURE", "msclae inferieur 1");
+            } else {
+                valeur = (int) ((Math.abs(mScale) * 0.1) % 7);
+                nbImageLigne = refNbImageLigne - valeur;
+                Log.d("GESTURE", "msclae Superieur 1");
+            }
+           // nbImageLigne = refNbImageLigne - valeur;
+            Log.d("GESTURE", "mScale = " + mScale + "nb ligne : " + valeur);
+            // securité limite nombre d'image
+            if (nbImageLigne > 7) {
+                nbImageLigne = 7;
+            } else if (nbImageLigne < 1) {
+                nbImageLigne = 1;
             }
 
             invalidate();
@@ -352,6 +382,6 @@ class utilisé pour gerer le nombre d'image sur une ligne a partid u geste de zo
             return true;
         }
     }
-
-
 }
+
+
