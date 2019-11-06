@@ -51,7 +51,7 @@ public class TouchExample extends View {
     private float touchPositionY = 0; // derniere vitesse du doit connue dans la direction Y (pour le drag)
     private float mouvement = 0; // determine la distance du mouvement (pour le drag)
     private int index = 0; // correspond a l'index de l'image visible en haut a gauche dans la liste  imagePathList
-    private static final int refNbImageLigne = 7;
+    private static final int refNbImageLigne = 7; //nombre d'image au demarage de l'application
 
     /**
      * construteur qui precharge  des images
@@ -201,7 +201,6 @@ public class TouchExample extends View {
         mPaint.setFilterBitmap(true);
 
         image.draw(canvas);
-
     }
 
     /**
@@ -221,6 +220,7 @@ public class TouchExample extends View {
                 positionX = i * (widthScreen / nbImageLigne);
                 drawPicture(numeroImage, new Rect(positionX, positionY * (widthScreen / nbImageLigne), positionX + (widthScreen / nbImageLigne), (widthScreen / nbImageLigne) + positionY * (widthScreen / nbImageLigne)), canvas);
                 numeroImage++;
+
             }
             Log.d("INITGALLERY", "positionY = " + positionY + "total Ligne = " + nbLigne);
         }
@@ -231,7 +231,7 @@ public class TouchExample extends View {
     protected void onDraw(Canvas canvas) { // fonction qui redessine l'écran
         super.onDraw(canvas);
         this.canvas = canvas;
-
+        int nbLigne = (int) (heightScreen / (widthScreen / nbImageLigne));
         //securité pour ne pas chercher une image qui n'existe pas
         if (index <= 0) {
             index = 0;
@@ -239,8 +239,8 @@ public class TouchExample extends View {
         if (index >= singleton.getInstance().imagePathList.size()) {
             index = singleton.getInstance().imagePathList.size();
         }
-        refrshGallery(nbImageLigne);
         preLoadedThread();
+        refrshGallery(nbImageLigne);
 
         // canvas.drawBitmap(image.getBitmap(), 0, 0, mPaint);
         Log.d("DRAW", "onDraw(Canvas canvas)");
@@ -342,7 +342,16 @@ public class TouchExample extends View {
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
             mScale *= detector.getScaleFactor();
+            nbImageLigne = ( int) (refNbImageLigne/mScale);
+            // securité limite nombre d'image
+            if (nbImageLigne > 7) {
+                nbImageLigne = 7;
+            } else if (nbImageLigne < 1) {
+                nbImageLigne = 1;
+            }
 
+            Log.d("GESTURE", "mScale = " + mScale + "nb ligne : " + nbImageLigne);
+/*
             int valeur = (int) ((Math.abs(mScale) * 0.1) % 7);
             Log.d("GESTURE", "mScale = " + mScale + "nb ligne : " + valeur);
             if (mScale < 0) {
@@ -351,7 +360,7 @@ public class TouchExample extends View {
                 nbImageLigne = 1;
             } else {
                 nbImageLigne = 7 - valeur;
-            }
+            }*/
 /*
 
             int valeur = 0;
