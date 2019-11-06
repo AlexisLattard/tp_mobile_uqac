@@ -11,8 +11,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+/**
+ * classe principale permettant d'afficher la vue, d'obtenir les droits d'accès au stockage
+ * et de scanner l'appareil
+ */
 public class MainActivity extends AppCompatActivity {
-    final static int GALLERY_REQUEST_CODE = 10;
     final static int MY_PERMISSIONS_REQUEST_EXTERNAL_STORAGE = 3;
 
     @Override
@@ -20,47 +23,38 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        TouchExample view = new TouchExample(this);
-        setContentView(view);
 
         //TODO faire le test selon les SDK
 
-// on verifie qu'on a acces au stockage
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.READ_EXTERNAL_STORAGE)
+        // on vérifie qu'on a accès au stockage
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
-
-
+            // TODO Supprimer le log
             Log.d("IMAGES", "IS NOT GRANTED");
-//  si ce n'est pas le cas on demande l'autorisation
+            //  si ce n'est pas le cas on demande l'autorisation
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
                     MY_PERMISSIONS_REQUEST_EXTERNAL_STORAGE);
-
-            // Permission is not granted
-
         }
-// on recupere les path
-        Cursor mCursor = getContentResolver()
-                .query(
-                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                        null,
-                        null,
-                        null,
-                        MediaStore.Images.Media.DEFAULT_SORT_ORDER);
+
+        // scanne et  récupère les chemins d'accès aux images stockées sur l'appareil
+        Cursor mCursor = getContentResolver().query(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                null, null, null,
+                MediaStore.Images.Media.DEFAULT_SORT_ORDER);
 
         mCursor.moveToFirst();
         while (!mCursor.isAfterLast()) {
+            // TODO Supprimer les logs
             Log.d("IMAGES", " - _ID : " + mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.Media._ID)));
             Log.d("IMAGES", " - File Name : " + mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.Media.DISPLAY_NAME)));
             Log.d("IMAGES", " - File Path : " + mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.Media.DATA)));
-            singleton.getInstance().imagePathList.add(mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.Media.DATA)));
+            Singleton.getInstance().imagePathList.add(mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.Media.DATA)));
             mCursor.moveToNext();
         }
         mCursor.close();
-
-
+        // on crée et affiche l'interface
+        ImageGallery view = new ImageGallery(this);
+        setContentView(view);
     }
-
-
 }
